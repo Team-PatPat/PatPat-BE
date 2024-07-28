@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Vendor {
+  KAKAO @map("kakao")
+  NAVER @map("naver")
+  LOCAL @map("local")
+}
+
+model User {
+  id        String    @id @default(uuid()) @db.VarChar(36)
+  email     String    @unique @db.VarChar(70)
+  password  String?   @db.VarChar(200)
+  name      String?   @db.VarChar(30)
+  mbti      String?   @db.VarChar(30)
+  vendor    Vendor
+  avatarUrl String?   @map("avatar_url") @db.VarChar(300)
+  isNew     Boolean   @default(true) @map("is_new")
+  chats     Chat[]
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  Letter    Letter[]
+}
+
+model Counselor {
+  id          String    @id @default(uuid()) @db.VarChar(36)
+  name        String    @unique @db.VarChar(30)
+  description String?   @db.VarChar(300)
+  greeting    String?   @db.VarChar(300)
+  order       Int
+  tags        String[]
+  taskId      String?   @db.VarChar(100)
+  prompt      String?   @db.Text
+  chats       Chat[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+}
+
+model Chat {
+  id          String    @id @default(uuid()) @db.VarChar(36)
+  counselorId String    @map("counselor_id") @db.VarChar(36)
+  counselor   Counselor @relation(fields: [counselorId], references: [id])
+  userId      String    @map("user_id") @db.VarChar(36)
+  user        User      @relation(fields: [userId], references: [id])
+  messages    Message[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+}
+
+enum MessageRole {
+  USER      @map("user")
+  ASSISTANT @map("assistant")
+  SYSTEM    @map("system")
+}
+
+enum MessageStatus {
+  PENDING   @map("pending")
+  COMPLETED @map("completed")
+}
+
+model Message {
+  id        String        @id @default(uuid()) @db.VarChar(36)
+  chatId    String        @map("chat_id") @db.VarChar(36)
+  chat      Chat          @relation(fields: [chatId], references: [id])
+  role      MessageRole
+  status    MessageStatus @default(PENDING)
+  type      String?       @db.VarChar(36)
+  content   String        @db.Text
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime?     @updatedAt @map("updated_at")
+}
+
+// TBU
+model Letter {
+  id          String    @id @default(uuid())
+  content     String    @db.Text
+  footer      String?   @db.Text
+  counselorId String    @map("counselor_id") @db.VarChar(36)
+  userId      String    @map("user_id") @db.VarChar(36)
+  user        User      @relation(fields: [userId], references: [id])
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @updatedAt @map("updated_at")
+}
