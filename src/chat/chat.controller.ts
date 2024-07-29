@@ -196,7 +196,12 @@ data: {"id":"de12d691-b536-4100-9663-89c0e1951c32","chatId":"6f66d25c-8f88-46e4-
       res.flushHeaders();
 
       this.chatService
-        .sendMessageWithStream(currentUser.id, counselorId, request.message)
+        .sendMessageWithStream(
+          currentUser.id,
+          counselorId,
+          request.message,
+          request.isGreeting,
+        )
         .subscribe({
           next: (data) => {
             res.write(`data: ${JSON.stringify(data)}\n\n`);
@@ -211,7 +216,12 @@ data: {"id":"de12d691-b536-4100-9663-89c0e1951c32","chatId":"6f66d25c-8f88-46e4-
         });
     } else {
       this.chatService
-        .sendMessage(currentUser.id, counselorId, request.message)
+        .sendMessage(
+          currentUser.id,
+          counselorId,
+          request.message,
+          request.isGreeting,
+        )
         .subscribe({
           next: (data) => {
             res.json(data);

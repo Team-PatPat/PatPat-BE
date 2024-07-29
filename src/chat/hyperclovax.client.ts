@@ -75,7 +75,6 @@ export class HyperClovaXClient {
             Accept: 'application/json',
             'X-NCP-CLOVASTUDIO-API-KEY': this.X_NCP_CLOVASTUDIO_API_KEY,
             'X-NCP-APIGW-API-KEY': this.X_NCP_APIGW_API_KEY,
-            'Cache-Control': 'no-cache', // 캐시 방지 헤더 추가
           },
         },
       )

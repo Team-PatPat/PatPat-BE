@@ -135,12 +135,21 @@ export class ChatService {
    * @param message A message to send.
    * @returns A response
    */
-  sendMessageWithStream(userId: string, counselorId: string, message: string) {
-    if (!message) {
+  sendMessageWithStream(
+    userId: string,
+    counselorId: string,
+    message: string,
+    isGreeting?: boolean,
+  ) {
+    if (!isGreeting && !message) {
       throw new BadRequestException(`'message' is missing.`);
     }
 
-    return this.sendMessage(userId, counselorId, message).pipe(
+    if (isGreeting) {
+      message = '안녕';
+    }
+
+    return this.sendMessage(userId, counselorId, message, isGreeting).pipe(
       switchMap((message) => {
         return from(message.content.split('').concat('[DONE]')).pipe(
           map((token) => {
@@ -225,9 +234,18 @@ export class ChatService {
    * @param input 전송할 입력
    * @returns 상담사 답변
    */
-  sendMessage(userId: string, counselorId: string, input: string) {
-    if (!input) {
+  sendMessage(
+    userId: string,
+    counselorId: string,
+    input: string,
+    isGreeting?: boolean,
+  ) {
+    if (!isGreeting && !input) {
       throw new BadRequestException(`'input' is missing.`);
+    }
+
+    if (isGreeting) {
+      input = '안녕';
     }
 
     return from(this.findChatByCounselorId(userId, counselorId)).pipe(
@@ -237,21 +255,37 @@ export class ChatService {
         }
 
         return from(
-          this.prismaService.message.create({
-            data: {
-              role: MessageRole.USER,
-              content: input,
-              chatId: chat.id,
-              status: MessageStatus.PENDING,
-            },
-            include: {
-              chat: true,
-            },
-          }),
+          isGreeting
+            ? Promise.resolve({
+                id: randomUUID(),
+                role: MessageRole.USER,
+                content: input,
+                chatId: chat.id,
+                chat: chat,
+                type: '일상',
+                status: MessageStatus.PENDING,
+                createdAt: new Date(),
+                updatedAt: null,
+              } as Message)
+            : this.prismaService.message.create({
+                data: {
+                  role: MessageRole.USER,
+                  content: input,
+                  chatId: chat.id,
+                  status: MessageStatus.PENDING,
+                },
+                include: {
+                  chat: true,
+                },
+              }),
         )
           .pipe(
-            mergeMap(async () => {
+            mergeMap(async (message) => {
               const messages = await this.findPendingMessagesByChatId(chat.id);
+
+              if (isGreeting) {
+                messages.unshift(message);
+              }
 
               return messages;
             }),

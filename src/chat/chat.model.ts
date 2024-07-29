@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MessageRole, MessageStatus } from '@prisma/client';
-import { IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 import { CounselorResponse } from 'src/counselor/counselor.model';
 
 export class CreateChatRequest {
@@ -17,6 +17,14 @@ export class SendMessageRequest {
     description: '전송할 메세지',
   })
   message: string;
+
+  @ApiPropertyOptional({
+    description: '환영 요청 여부',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isGreeting?: boolean;
 }
 
 export class MessageResponse {
