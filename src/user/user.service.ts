@@ -1,16 +1,24 @@
+import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { User, Vendor } from '@prisma/client';
 import { randomUUID } from 'crypto';
+import { firstValueFrom } from 'rxjs';
 import { Page, Pageable } from 'src/shared/model/page.model';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async findUsers(pageable: Pageable): Promise<Page<User>> {
     const users = await this.prismaService.user.findMany({
@@ -95,6 +103,7 @@ export class UserService {
     email: string,
     vendor: Vendor,
     avatarUrl?: string,
+    vendorUserId?: string,
   ): Promise<User> {
     const existingUser = await this.prismaService.user.findUnique({
       where: {
@@ -116,7 +125,66 @@ export class UserService {
         name,
         vendor,
         avatarUrl,
+        vendorUserId,
       },
+    });
+  }
+
+  async deleteUser(userId: string) {
+    const user = await this.findUserByUserId(userId);
+
+    if (!user) {
+      throw new NotFoundException(`User not found.`);
+    }
+
+    if (user.vendor === 'KAKAO') {
+      const response = await firstValueFrom(
+        this.httpService.post(
+          `	https://kapi.kakao.com/v1/user/unlink`,
+          {
+            target_id_type: 'user_id',
+            target_id: user.vendorUserId,
+          },
+          {
+            headers: {
+              Authorization: `KakaoAK ${this.configService.get('KAKAO_ADMIN_KEY')}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          },
+        ),
+      );
+
+      if (response.status >= 400) {
+        throw new InternalServerErrorException(`Failed to unlink from Kakao.`);
+      }
+    }
+
+    this.prismaService.$transaction(async (tx) => {
+      await tx.message.deleteMany({
+        where: {
+          chat: {
+            userId: user.id,
+          },
+        },
+      });
+
+      await tx.chat.deleteMany({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      await tx.letter.deleteMany({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      await tx.user.delete({
+        where: {
+          id: user.id,
+        },
+      });
     });
   }
 }

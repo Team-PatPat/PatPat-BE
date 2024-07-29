@@ -107,11 +107,15 @@ export class AuthService {
     email?: string,
     password?: string,
   ): Promise<TokenResponse & User> {
-    let profile: Pick<User, 'name' | 'email' | 'avatarUrl' | 'vendor'> = {
+    let profile: Pick<
+      User,
+      'name' | 'email' | 'avatarUrl' | 'vendor' | 'vendorUserId'
+    > = {
       name: null,
       email: null,
       avatarUrl: null,
       vendor: null,
+      vendorUserId: null,
     };
 
     if (vendor === Vendor.KAKAO) {
@@ -140,6 +144,7 @@ export class AuthService {
           name: null,
           avatarUrl: _profile.kakaoAccount.profile.profileImageUrl,
           vendor: Vendor.KAKAO,
+          vendorUserId: _profile.id,
         };
       } catch (e: unknown) {
         if (e instanceof AxiosError) {
@@ -175,6 +180,7 @@ export class AuthService {
           name: null,
           avatarUrl: _profile.response.profileImage,
           vendor: Vendor.NAVER,
+          vendorUserId: _profile.response.id,
         };
       } catch (e: unknown) {
         if (e instanceof AxiosError) {
@@ -222,6 +228,7 @@ export class AuthService {
         profile.email,
         profile.vendor,
         profile.avatarUrl,
+        profile.vendorUserId,
       );
     }
 
