@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Put, Query } from '@nestjs/common';
 import {
   ApiExtraModels,
   ApiOperation,
@@ -62,7 +62,7 @@ export class UserController {
   }
 
   @Put('/me')
-  @ApiOperation({ summary: '현재 사용자 정보 조회' })
+  @ApiOperation({ summary: '현재 사용자 정보 변경' })
   @ApiResponse({
     status: 200,
     description: 'OK.',
@@ -70,11 +70,23 @@ export class UserController {
   })
   @ApiResponse({ status: 401, description: 'Invalid request.' })
   @ApiResponse({ status: 500, description: 'Internal Server Error.' })
-  put(@CurrentUser() currentUser: Payload, @Body() request: UpdateUserRequest) {
+  updateUser(
+    @CurrentUser() currentUser: Payload,
+    @Body() request: UpdateUserRequest,
+  ) {
     return this.userService.updateUserByUserId(
       currentUser.id,
       request.name,
       request.mbti,
     );
+  }
+
+  @Delete('/me')
+  @ApiOperation({ summary: '현재 사용자 탈퇴' })
+  @ApiResponse({ status: 200, description: 'OK.' })
+  @ApiResponse({ status: 401, description: 'Invalid request.' })
+  @ApiResponse({ status: 500, description: 'Internal Server Error.' })
+  async deleteUser(@CurrentUser() currentUser: Payload) {
+    await this.userService.deleteUser(currentUser.id);
   }
 }
