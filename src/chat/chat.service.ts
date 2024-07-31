@@ -61,7 +61,7 @@ export class ChatService {
       },
       include: {
         counselor: true,
-        messages: true,
+        messages: false,
       },
     });
   }
@@ -84,7 +84,7 @@ export class ChatService {
         },
         include: {
           counselor: true,
-          messages: true,
+          messages: false,
         },
       });
     }
