@@ -23,13 +23,18 @@ import {
   ApiProduces,
   ApiTags,
   ApiUnauthorizedResponse,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { AxiosError } from 'axios';
 import { Request, Response } from 'express';
 import { CurrentUser } from 'src/auth/auth.decorator';
 import { Payload } from 'src/auth/auth.dto';
 import { Pageable } from 'src/shared/model/page.model';
-import { ChatResponse, SendMessageRequest } from './chat.model';
+import {
+  ChatResponse,
+  MessageResponse,
+  SendMessageRequest,
+} from './chat.model';
 import { ChatService } from './chat.service';
 
 @ApiTags('Chat')
@@ -108,9 +113,7 @@ export class ChatController {
     description: 'OK.',
     content: {
       'text/event-stream': {
-        schema: {
-          type: 'string',
-          example: `
+        example: `
 data: {"id":"de12d691-b536-4100-9663-89c0e1951c32","chatId":"6f66d25c-8f88-46e4-adf1-8930d78dee15","role":"ASSISTANT","status":"PENDING","content":"안","createdAt":"2024-07-24T17:16:01.042Z","updatedAt":"2024-07-24T17:16:01.042Z"}
 
 data: {"id":"de12d691-b536-4100-9663-89c0e1951c32","chatId":"6f66d25c-8f88-46e4-adf1-8930d78dee15","role":"ASSISTANT","status":"PENDING","content":"녕","createdAt":"2024-07-24T17:16:01.042Z","updatedAt":"2024-07-24T17:16:01.042Z"}
@@ -149,22 +152,26 @@ data: {"id":"de12d691-b536-4100-9663-89c0e1951c32","chatId":"6f66d25c-8f88-46e4-
 
 data: {"id":"de12d691-b536-4100-9663-89c0e1951c32","chatId":"6f66d25c-8f88-46e4-adf1-8930d78dee15","role":"ASSISTANT","status":"PENDING","content":"[DONE]","createdAt":"2024-07-24T17:16:01.042Z","updatedAt":"2024-07-24T17:16:01.042Z"}
 
-          `,
+        `,
+        schema: {
+          type: 'string',
         },
       },
       'application/json': {
+        example: {
+          id: 'd3032e07-48f6-40d7-ad55-a2b75ae41022',
+          chatId: 'ed32a958-7cbd-4dc0-a196-a71ff4552b8a',
+          role: 'ASSISTANT',
+          status: 'PENDING',
+          type: '일반',
+          content:
+            '단순이 아이가!!!! 니 무슨 일 있나? 퍼뜩 기운 내그래이!!!!!!',
+          createdAt: '2024-07-31T16:25:15.472Z',
+          updatedAt: '2024-07-31T16:25:15.492Z',
+        },
         schema: {
           type: 'object',
-          example: {
-            message: {
-              role: 'assistant',
-              content: 'Hello! How can I assist you today?',
-            },
-            inputLength: 4,
-            outputLength: 11,
-            stopReason: 'stop_before',
-            seed: 280489950,
-          },
+          $ref: getSchemaPath(MessageResponse),
         },
       },
     },
