@@ -144,7 +144,7 @@ export class AuthService {
           name: null,
           avatarUrl: _profile.kakaoAccount.profile.profileImageUrl,
           vendor: Vendor.KAKAO,
-          vendorUserId: _profile.id,
+          vendorUserId: `${_profile.id}`,
         };
       } catch (e: unknown) {
         if (e instanceof AxiosError) {
