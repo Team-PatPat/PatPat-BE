@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, Put, Query } from '@nestjs/common';
 import {
+  ApiBearerAuth,
+  ApiCookieAuth,
   ApiExtraModels,
   ApiOperation,
   ApiResponse,
@@ -13,8 +15,10 @@ import { Page, Pageable } from 'src/shared/model/page.model';
 import { UpdateUserRequest, UserResponse } from './user.model';
 import { UserService } from './user.service';
 
+@ApiBearerAuth()
 @ApiTags('Users')
 @Controller('/api/v1/users')
+@ApiCookieAuth('access_token')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
