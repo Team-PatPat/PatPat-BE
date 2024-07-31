@@ -67,7 +67,6 @@ enum MessageRole {
 }
 
 enum MessageStatus {
-  GREETING  @map("greeting")
   PENDING   @map("pending")
   COMPLETED @map("completed")
 }
