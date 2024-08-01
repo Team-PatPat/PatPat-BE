@@ -83,7 +83,6 @@ model Message {
   updatedAt DateTime?     @updatedAt @map("updated_at")
 }
 
-// TBU
 model Letter {
   id          String    @id @default(uuid())
   content     String    @db.Text
@@ -91,6 +90,7 @@ model Letter {
   counselorId String    @map("counselor_id") @db.VarChar(36)
   userId      String    @map("user_id") @db.VarChar(36)
   user        User      @relation(fields: [userId], references: [id])
+  isLiked     Boolean?  @default(false) @map("is_liked")
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime? @updatedAt @map("updated_at")
 }

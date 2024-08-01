@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsBoolean, IsString } from 'class-validator';
 
 export class GenerateLetterRequest {
   @ApiProperty({
@@ -7,6 +7,14 @@ export class GenerateLetterRequest {
   })
   @IsString()
   counselorId: string;
+}
+
+export class UpdateLetterRequest {
+  @ApiProperty({
+    description: '생성할 상담사 고유번호',
+  })
+  @IsBoolean()
+  isLiked: boolean;
 }
 
 export class LetterResponse {

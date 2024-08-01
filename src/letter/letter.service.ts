@@ -26,7 +26,11 @@ export class LetterService {
   /**
    * Finds an user's letters.
    */
-  async findLettersByUserId(userId: string, pageable: Pageable) {
+  async findLettersByUserId(
+    userId: string,
+    isLiked: boolean,
+    pageable: Pageable,
+  ) {
     if (!userId) {
       throw new BadRequestException(`'userId' is missing.`);
     }
@@ -34,6 +38,7 @@ export class LetterService {
     const messages = await this.prismaService.letter.findMany({
       where: {
         userId,
+        isLiked,
       },
       skip: (pageable.page - 1) * pageable.size,
       take: pageable.size,
@@ -70,6 +75,34 @@ export class LetterService {
       },
       orderBy: {
         createdAt: 'desc',
+      },
+    });
+  }
+
+  async updateLetter(userId: string, letterId: string, isLiked: boolean) {
+    if (!userId) {
+      throw new BadRequestException(`'userId' is missing.`);
+    }
+    if (!letterId) {
+      throw new BadRequestException(`'letterId' is missing.`);
+    }
+
+    const letter = await this.prismaService.letter.findUnique({
+      where: {
+        id: letterId,
+      },
+    });
+
+    if (!letter) {
+      throw new NotFoundException(`Letter not found.`);
+    }
+
+    return this.prismaService.letter.update({
+      where: {
+        id: letter.id,
+      },
+      data: {
+        isLiked,
       },
     });
   }
