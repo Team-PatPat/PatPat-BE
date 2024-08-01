@@ -79,6 +79,34 @@ export class LetterService {
     });
   }
 
+  async updateLetter(userId: string, letterId: string, isLiked: boolean) {
+    if (!userId) {
+      throw new BadRequestException(`'userId' is missing.`);
+    }
+    if (!letterId) {
+      throw new BadRequestException(`'letterId' is missing.`);
+    }
+
+    const letter = await this.prismaService.letter.findUnique({
+      where: {
+        id: letterId,
+      },
+    });
+
+    if (!letter) {
+      throw new NotFoundException(`Letter not found.`);
+    }
+
+    return this.prismaService.letter.update({
+      where: {
+        id: letter.id,
+      },
+      data: {
+        isLiked,
+      },
+    });
+  }
+
   async deleteLettersByCounselorId(userId: string, counselorId: string) {
     if (!userId) {
       throw new BadRequestException(`'userId' is missing.`);

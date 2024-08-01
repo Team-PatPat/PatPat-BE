@@ -1,8 +1,18 @@
-import { Body, Controller, Delete, Get, Post, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCookieAuth,
   ApiExtraModels,
+  ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiResponse,
@@ -12,7 +22,11 @@ import {
 import { CurrentUser } from 'src/auth/auth.decorator';
 import { Payload } from 'src/auth/auth.dto';
 import { Pageable } from 'src/shared/model/page.model';
-import { GenerateLetterRequest, LetterResponse } from './letter.model';
+import {
+  GenerateLetterRequest,
+  LetterResponse,
+  UpdateLetterRequest,
+} from './letter.model';
 import { LetterService } from './letter.service';
 
 @ApiTags('Letters')
@@ -89,6 +103,21 @@ export class LetterController {
       currentUser.id,
       currentUser.name,
       request.counselorId,
+    );
+  }
+
+  @Put('/:letterId')
+  @ApiOperation({ summary: '편지 수정' })
+  @ApiOkResponse({ type: LetterResponse })
+  async updateLetter(
+    @CurrentUser() currentUser: Payload,
+    @Param('letterId') letterId: string,
+    @Body() request: UpdateLetterRequest,
+  ) {
+    return this.letterService.updateLetter(
+      currentUser.id,
+      letterId,
+      request.isLiked,
     );
   }
 
