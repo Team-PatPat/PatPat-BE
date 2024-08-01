@@ -26,7 +26,11 @@ export class LetterService {
   /**
    * Finds an user's letters.
    */
-  async findLettersByUserId(userId: string, pageable: Pageable) {
+  async findLettersByUserId(
+    userId: string,
+    isLiked: boolean,
+    pageable: Pageable,
+  ) {
     if (!userId) {
       throw new BadRequestException(`'userId' is missing.`);
     }
@@ -34,6 +38,7 @@ export class LetterService {
     const messages = await this.prismaService.letter.findMany({
       where: {
         userId,
+        isLiked,
       },
       skip: (pageable.page - 1) * pageable.size,
       take: pageable.size,

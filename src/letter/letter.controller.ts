@@ -4,6 +4,7 @@ import {
   ApiCookieAuth,
   ApiExtraModels,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
   getSchemaPath,
@@ -23,6 +24,7 @@ export class LetterController {
 
   @Get()
   @ApiExtraModels(LetterResponse)
+  @ApiQuery({ name: 'isLiked', required: false, type: Boolean })
   @ApiOperation({ summary: '편지 목록 조회' })
   @ApiResponse({
     status: 200,
@@ -47,8 +49,13 @@ export class LetterController {
   findLetters(
     @CurrentUser() currentUser: Payload,
     @Query() pageable: Pageable,
+    @Query('isLiked') isLiked?: boolean,
   ) {
-    return this.letterService.findLettersByUserId(currentUser.id, pageable);
+    return this.letterService.findLettersByUserId(
+      currentUser.id,
+      isLiked,
+      pageable,
+    );
   }
 
   @Post()
