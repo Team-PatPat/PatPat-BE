@@ -10,8 +10,8 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { Public } from './auth.decorator';
-import { LogInRequest, TokenResponse } from './auth.dto';
+import { CurrentUser, Public } from './auth.decorator';
+import { LogInRequest, Payload, TokenResponse } from './auth.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('Auth')
@@ -103,9 +103,11 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
   @ApiInternalServerErrorResponse({ description: 'Internal Server Error.' })
-  async logOut(@Res() response: Response) {
+  async logOut(@CurrentUser() currentUser: Payload, @Res() response: Response) {
     response.clearCookie('access_token');
     response.clearCookie('refresh_token');
+
+    await this.authService.logOut(currentUser.id);
 
     return response.send();
   }

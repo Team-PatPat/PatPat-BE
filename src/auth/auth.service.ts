@@ -2,6 +2,8 @@ import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -243,5 +245,34 @@ export class AuthService {
         avatarUrl: existingUser.avatarUrl,
       }),
     };
+  }
+
+  async logOut(userId: string) {
+    const user = await this.userService.findUserByUserId(userId);
+    if (!user) {
+      throw new NotFoundException(`User not found.`);
+    }
+
+    if (user.vendor === Vendor.KAKAO) {
+      const response = await firstValueFrom(
+        this.httpService.post(
+          `	https://kapi.kakao.com/v1/user/logout`,
+          {
+            target_id_type: 'user_id',
+            target_id: user.vendorUserId,
+          },
+          {
+            headers: {
+              Authorization: `KakaoAK ${this.configService.get('KAKAO_ADMIN_KEY')}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+          },
+        ),
+      );
+
+      if (response.status >= 400) {
+        throw new InternalServerErrorException(`Failed to log out from Kakao.`);
+      }
+    }
   }
 }
